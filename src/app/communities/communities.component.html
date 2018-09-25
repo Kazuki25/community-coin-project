@@ -1,0 +1,35 @@
+<div *ngFor="let community of communities" class="box30">
+    <div class="box-title">{{community.name}}</div>
+    <div class="box-container">
+      <table class="balance-table">
+      　<tr>
+      　　<th class="r1">コイン</th>
+      　　<th class="r2">残高</th>
+      　</tr>
+      　<tr>
+        　　<td>Community</td>
+        　　<td>100,000</td>
+        </tr>
+        　<tr>
+          　　<td>自分コイン発行量</td>
+          　　<td>7,000</td>
+          　</tr>
+      　<tr>
+        　　<td class="subtitle">個人コイン</td>
+        　　<td class="subtitle"></td>
+        </tr>
+      　<tr>
+      　　<td>田中Coin</td>
+      　　<td>100,000</td>
+      　</tr>
+      　<tr>
+      　　<td>鈴木Coin</td>
+      　　<td>10,000,000</td>
+      　</tr>
+      </table>
+    </div>
+</div>
+
+<h3>Welcome to Ethereum Chain!!</h3>
+<p>CoinBase: {{coinbase}}</p>
+<p *ngFor="let account of accounts">{{account}}</p>

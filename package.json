@@ -19,9 +19,14 @@
     "@angular/http": "~7.0.0-beta.5",
     "@angular/platform-browser": "~7.0.0-beta.5",
     "@angular/platform-browser-dynamic": "~7.0.0-beta.5",
+    "@angular/pwa": "^0.8.3",
     "@angular/router": "~7.0.0-beta.5",
+    "@angular/service-worker": "~7.0.0-beta.5",
+    "angular-in-memory-web-api": "^0.6.1",
     "core-js": "^2.5.4",
+    "http-server": "^0.11.1",
     "rxjs": "~6.3.2",
+    "web3": "^0.20.5",
     "zone.js": "~0.8.26"
   },
   "devDependencies": {
