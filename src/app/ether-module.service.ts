@@ -14,7 +14,7 @@ export class EtherModuleService {
     if (typeof window.web3 !== 'undefined') {
       this.web3Provider = window.web3.currentProvider;
     } else {
-      this.web3Provider = new Web3.providers.HttpProvider("http://localhost:8545");
+      this.web3Provider = new Web3.providers.HttpProvider("http://127.0.0.1:7545");
     }
 
     window.web3 = new Web3(this.web3Provider);
@@ -60,7 +60,7 @@ export class EtherModuleService {
       // ERC20トークンの decimals を取得
       contract.decimals((error, decimals) => {
         // 残高を計算
-        balance = balance.div(10**decimals);
+        balance = balance/(10**decimals);
         console.log(balance.toString());
       });
     });
