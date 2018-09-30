@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Community } from '../community';
 import { CommunityService } from '../community.service';
 import { EtherModuleService } from '../ether-module.service';
+import { IdbModuleService } from '../idb-module.service';
 
 @Component({
   selector: 'app-communities',
@@ -15,7 +16,8 @@ export class CommunitiesComponent implements OnInit {
 
   constructor(
     private communityService: CommunityService,
-    private etherModuleService: EtherModuleService
+    private etherModuleService: EtherModuleService,
+    private idbModuleService: IdbModuleService
   ) { }
 
   ngOnInit() {
@@ -23,6 +25,7 @@ export class CommunitiesComponent implements OnInit {
     this.getEtherAccounts();
     this.getCoinBaseAddress();
     this.getBalance();
+    this.testidb();
   }
 
   getCommunities(): void {
@@ -40,7 +43,29 @@ export class CommunitiesComponent implements OnInit {
   }
 
   getBalance():void {
-    this.etherModuleService.getTokenBalance();
+    let accounts = this.accounts;
+    let contractAddress = "0x3b66b335fa28c1d2a391d23db872e041a9024443";
+    for(var i=0; i<accounts.length; i++){
+      console.log("Account:",accounts[i]," => ",this.etherModuleService.getTokenBalance(contractAddress,accounts[i]));
+      // this.etherModuleService.getTokenBalance(accounts[i],console.log);
+    }
+    
+  }
+
+  testidb():void {
+    let user = { firstName: 'Henri', lastName: 'Bergson' };
+    let array = { suji: [1,2,3,4,5] };
+
+    this.idbModuleService.set('user', user);
+    this.idbModuleService.set('hairetsu', array);
+    let result = this.idbModuleService.get('user');
+    console.log(result['firstName']);
+    console.log(result['lastName'])
+
+    console.log(this.idbModuleService.get('hairetsu')['suji']);
+
+    console.log('[Eth-Module]: create account')
+    this.etherModuleService.createAccount('password');
   }
 
 
