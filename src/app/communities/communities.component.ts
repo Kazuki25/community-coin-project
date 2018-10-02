@@ -13,6 +13,7 @@ export class CommunitiesComponent implements OnInit {
   communities: Community[];
   accounts: string[];
   coinbase: String;
+  addr: string;
 
   constructor(
     private communityService: CommunityService,
@@ -34,7 +35,14 @@ export class CommunitiesComponent implements OnInit {
   }
 
   getCoinBaseAddress(): void {
-    this.coinbase = this.etherModuleService.getCoinBaseAddress();
+    this.etherModuleService.getCoinBaseAddress().then(
+      // (result, error) => {
+      //   this.coinbase = result;
+      // };
+      function(result) {
+        this.coinbase = result;
+      }.bind(this)
+    )
   }
 
   getEtherAccounts(): void {
@@ -65,7 +73,14 @@ export class CommunitiesComponent implements OnInit {
     console.log(this.idbModuleService.get('hairetsu')['suji']);
 
     console.log('[Eth-Module]: create account')
-    this.etherModuleService.createAccount('password');
+    this.etherModuleService.createAccount('password').then(
+      // (result, error) => {
+      //   this.addr = result;
+      // };
+      function(result) {
+        this.addr = result;
+      }.bind(this)
+    )
   }
 
 

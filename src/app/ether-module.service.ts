@@ -20,16 +20,14 @@ export class EtherModuleService {
     window.web3 = new Web3(this.web3Provider);
   }
 
-  createAccount(password:string) {
-    window.web3.eth.newAccount(password).then(function(e){
-      console.log(e);
-    });
+  createAccount(password:string): Promise<string> {
+    return window.web3.eth.personal.newAccount(password);
   }
 
-  getCoinBaseAddress():String {
+  getCoinBaseAddress():Promise<string> {
     // console.log(window.web3);
-    console.log(window.web3.net.listening)
-    return window.web3.coinbase;
+    // console.log(window.web3.net.listening)
+    return window.web3.eth.getCoinbase();
   }
 
   getAccounts():string[] {

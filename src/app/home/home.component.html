@@ -1,0 +1,23 @@
+<p>
+  home works!
+</p>
+
+<p>
+  あなたの保有しているウォレット
+</p>
+<ul>
+    <li>アドレス１</li>
+    <li>アドレス２</li>
+    <li>アドレス３</li>
+</ul>
+
+<input [(ngModel)]="password" placeholder="New password"/><br>
+<button (click)="test()">新しいWalletを作る</button>
+
+<p *ngIf="addr">Your new account: {{addr}}</p>
+
+<br><button (click)="readWallet()">WalletAddress</button>
+<br><p>read from DB:{{yourWallet}}</p>
+
+
+

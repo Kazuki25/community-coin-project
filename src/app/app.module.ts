@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -12,16 +13,19 @@ import { CommunitiesComponent } from './communities/communities.component';
 import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from './in-memory-data.service';
 import { MessagesComponent } from './messages/messages.component';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CommunitiesComponent,
-    MessagesComponent
+    MessagesComponent,
+    HomeComponent
   ],
   imports: [
     BrowserModule,
     FormsModule,
+    NgbModule,
     HttpClientInMemoryWebApiModule,
     HttpClientModule,
     AppRoutingModule,

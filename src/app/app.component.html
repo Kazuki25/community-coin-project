@@ -1,12 +1,19 @@
 
 
 <div class="tabs">
-  <input id="balance" type="radio" name="tab_item" checked>
+  <input id="home" type="radio" name="tab_item" checked>
+  <label class="tab_item" for="home">HOME</label>
+  <input id="balance" type="radio" name="tab_item">
   <label class="tab_item" for="balance">BALANCE</label>
   <input id="send_coin" type="radio" name="tab_item">
   <label class="tab_item" for="send_coin">SEND COIN</label>
   <input id="details" type="radio" name="tab_item">
   <label class="tab_item" for="details">DETAILS</label>
+  <div class="tab_content" id="home_content">
+      <div class="tab_content_description">
+        <app-home></app-home>
+      </div>
+    </div>
   <div class="tab_content" id="balance_content">
     <div class="tab_content_description">
       <app-communities></app-communities>
