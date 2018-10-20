@@ -1,23 +1,27 @@
-<p>
-  home works!
-</p>
+CommunityCoinWalletへようこそ！
 
-<p>
-  あなたの保有しているウォレット
-</p>
-<ul>
-    <li>アドレス１</li>
-    <li>アドレス２</li>
-    <li>アドレス３</li>
-</ul>
+<div *ngIf="haveWallet">
+    <p>あなたの保有しているウォレット</p>
+    <div *ngFor="let wallet of wallets">
+      {{wallet.name}}:<br>
+      {{wallet.address}}<br>
+      {{wallet.wei}} wei || 
+      <a (click)="getWeis(wallet)">get wei</a><br>
+      <a (click)="deleteWallet(wallet)">delete wallet</a>
+    </div>
+    <br>
+    <button (click)="reflesh()">update list</button>
+</div>
 
-<input [(ngModel)]="password" placeholder="New password"/><br>
-<button (click)="test()">新しいWalletを作る</button>
+<!-- <div *ngIf="haveWallet">
+  <img src="https://api.qrserver.com/v1/create-qr-code/?data={{yourWallet}}" alt="Your Wallet Address" />
+</div> -->
+<div *ngIf="!haveWallet">
+  <p>まだWalletがありません</p>
+  <br>
 
-<p *ngIf="addr">Your new account: {{addr}}</p>
-
-<br><button (click)="readWallet()">WalletAddress</button>
-<br><p>read from DB:{{yourWallet}}</p>
-
-
-
+  <input [(ngModel)]="walletName" placeholder="Wallet name"/><br>
+  <input [(ngModel)]="password" placeholder="New password"/><br>
+  <!-- <a>タグのスタイリッシュなボタンに後で変えたい -->
+  <button (click)="createWallet()">新しいWalletを作る</button>
+</div>

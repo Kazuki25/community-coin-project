@@ -1,5 +1,5 @@
-<div *ngFor="let community of communities" class="box30">
-    <div class="box-title">{{community.name}}</div>
+<div *ngFor="let coin of coins" class="box30">
+    <div class="box-title">{{coin.name}}</div>
     <div class="box-container">
       <table class="balance-table">
       　<tr>
@@ -7,7 +7,7 @@
       　　<th class="r2">残高</th>
       　</tr>
       　<tr>
-        　　<td>Community</td>
+        　　<td>{{coin.name}}Coin</td>
         　　<td>100,000</td>
         </tr>
         　<tr>
@@ -26,12 +26,15 @@
       　　<td>鈴木Coin</td>
       　　<td>10,000,000</td>
       　</tr>
-        <tr>
-          <td>コインベース</td>
-          <td>{{coinbase}}</td>
-        </tr>
       </table>
+      <a (click)="deleteCoin(coin)">delete coin from the list.</a>
     </div>
 </div>
 
-<p>New account: {{addr}}</p>
+新しいコミュニティコインを登録する<br>
+<input [(ngModel)]="coinName" placeholder="CommunityCoin name"/><br>
+<input [(ngModel)]="coinAddress" placeholder="CommunityCoin contract address"/><br>
+<button (click)="registerCoin()">新しいコインを登録する</button><br>
+
+<br>
+<button (click)="refleshList()">コインリストの最新化</button>

@@ -14,6 +14,10 @@ import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { InMemoryDataService } from './in-memory-data.service';
 import { MessagesComponent } from './messages/messages.component';
 import { HomeComponent } from './home/home.component';
+import { IdbModuleService } from './idb-module.service';
+import { EtherModuleService } from './ether-module.service';
+import { WalletStateService } from './wallet-state.service';
+import { CommunityService } from './community.service';
 
 @NgModule({
   declarations: [
@@ -40,7 +44,12 @@ import { HomeComponent } from './home/home.component';
   schemas: [
     CUSTOM_ELEMENTS_SCHEMA,
   ],
-  providers: [],
+  providers: [
+    IdbModuleService,
+    EtherModuleService,
+    WalletStateService,
+    CommunityService
+  ],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

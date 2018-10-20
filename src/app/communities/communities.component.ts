@@ -1,8 +1,10 @@
-import { Component, OnInit } from '@angular/core';
-import { Community } from '../community';
+import { Component, OnInit} from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommunityService } from '../community.service';
 import { EtherModuleService } from '../ether-module.service';
 import { IdbModuleService } from '../idb-module.service';
+import { WalletStateService } from '../wallet-state.service';
+import { Coin } from '../coin';
 
 @Component({
   selector: 'app-communities',
@@ -10,79 +12,100 @@ import { IdbModuleService } from '../idb-module.service';
   styleUrls: ['./communities.component.scss']
 })
 export class CommunitiesComponent implements OnInit {
-  communities: Community[];
+  coins: Coin[];
+  haveCoin: boolean;
   accounts: string[];
-  coinbase: String;
-  addr: string;
+  coinbase: string;
+
+  // CommunityCoin登録用変数
+  coinName: string;
+  coinAddress: string;
+
+  subscription: Subscription;
 
   constructor(
     private communityService: CommunityService,
     private etherModuleService: EtherModuleService,
-    private idbModuleService: IdbModuleService
+    private idbModuleService: IdbModuleService,
+    private walletStateService: WalletStateService
   ) { }
 
   ngOnInit() {
-    this.getCommunities();
-    this.getEtherAccounts();
-    this.getCoinBaseAddress();
-    this.getBalance();
-    this.testidb();
+    // this.getCommunities();
+    this._checkCoin();
   }
 
   getCommunities(): void {
-    this.communityService.getCommunities()
-        .subscribe(communities => this.communities = communities);
+    // wallet stateから登録されているコインを取得する
+    let obj = this.walletStateService.getContracts()
+    // 毎回初期化する.
+    this.coins = [];
+    for (let key in obj) {
+      this.coins.push(new Coin(key, obj[key]));
+    } 
   }
 
-  getCoinBaseAddress(): void {
-    this.etherModuleService.getCoinBaseAddress().then(
-      // (result, error) => {
-      //   this.coinbase = result;
-      // };
-      function(result) {
-        this.coinbase = result;
-      }.bind(this)
-    )
+  /**
+   * register new community coin.
+   */
+  registerCoin(){
+    console.log("[CommunitiesComponent]:register new coin to your wallet.");
+    this.walletStateService.setNewCoin(this.coinName, this.coinAddress);
+    // form initialize
+    this.coinName = "";
+    this.coinAddress = "";
+    // this.subscription = this.walletStateService.coinRegistered$.subscribe(
+    //   (result) => {
+    //     if(result === true){
+    //       // this._checkCoin();
+    //     }
+    //   }
+    // )
+    this._checkCoin();
   }
 
-  getEtherAccounts(): void {
-    this.accounts = this.etherModuleService.getAccounts();
-    console.log(this.accounts);
+  /**
+   * reflesh coin list
+   */
+  refleshList() {
+    this._checkCoin();
   }
 
-  getBalance():void {
-    let accounts = this.accounts;
-    let contractAddress = "0x3b66b335fa28c1d2a391d23db872e041a9024443";
-    for(var i=0; i<accounts.length; i++){
-      console.log("Account:",accounts[i]," => ",this.etherModuleService.getTokenBalance(contractAddress,accounts[i]));
-      // this.etherModuleService.getTokenBalance(accounts[i],console.log);
+  /**
+   * remove coin from app storage.
+   * @param coin Coin object to delete
+   */
+  deleteCoin(coin:Coin) {
+    this.walletStateService.removeContract(coin.name);
+    console.log("[CommunitiesComponent]:"+coin.name+" is removed from app.");
+    this._checkCoin();
+  }
+
+  /**
+   * check if you have community coin
+   * no params
+   */
+  private _checkCoin(){
+    let obj = this.walletStateService.getContracts();
+    let num = Object.keys(obj).length;
+    if(num == 0) {
+      this.haveCoin = false;
+    } else {
+      this.haveCoin = true;
+      this._storeCoinList(obj);
+      console.log("[CommunitiesComponent]:update coin list.")
     }
-    
   }
-
-  testidb():void {
-    let user = { firstName: 'Henri', lastName: 'Bergson' };
-    let array = { suji: [1,2,3,4,5] };
-
-    this.idbModuleService.set('user', user);
-    this.idbModuleService.set('hairetsu', array);
-    let result = this.idbModuleService.get('user');
-    console.log(result['firstName']);
-    console.log(result['lastName'])
-
-    console.log(this.idbModuleService.get('hairetsu')['suji']);
-
-    console.log('[Eth-Module]: create account')
-    this.etherModuleService.createAccount('password').then(
-      // (result, error) => {
-      //   this.addr = result;
-      // };
-      function(result) {
-        this.addr = result;
-      }.bind(this)
-    )
+  
+  /**
+   * store coin name/address into coins.
+   * @param obj 
+   */
+  private _storeCoinList(obj) {
+    // 毎回初期化する.
+    this.coins = [];
+    for (let key in obj) {
+      this.coins.push(new Coin(key, obj[key]));
+    }
   }
-
-
-
 }
