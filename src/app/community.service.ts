@@ -4,12 +4,14 @@ import { Community } from './community';
 import { Observable, of } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 import { MessageService } from './message.service';
+import { Wallet } from './wallet';
 
 @Injectable({
   providedIn: 'root'
 })
 export class CommunityService {
   private CommunitiesUrl = 'api/communities';  // URL to web api
+  private WalletsUrl = 'api/wallets';  // URL to web api
   
   constructor(
     private http: HttpClient,
@@ -30,6 +32,15 @@ export class CommunityService {
       );
   }
 
+  getWallets(): Observable<Wallet[]> {
+    // send the message _after_ fetching the wallets
+    this.messageService.add('CommunityService: fetched wallets');
+    return this.http.get<Wallet[]>(this.WalletsUrl)
+      .pipe(
+        tap(wallets => this.log(`fetched wallets`)),
+        catchError(this.handleError('getwallets',[]))
+      );
+  }
   /**
    * Handle Http operation that failed.
    * Let the app continue.

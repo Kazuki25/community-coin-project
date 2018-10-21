@@ -24,4 +24,11 @@ CommunityCoinWalletへようこそ！
   <input [(ngModel)]="password" placeholder="New password"/><br>
   <!-- <a>タグのスタイリッシュなボタンに後で変えたい -->
   <button (click)="createWallet()">新しいWalletを作る</button>
+
+  <br>Or<br>
+  walletを選んでね
+  <div *ngFor="let wallet of walletList">
+    {{wallet.name}}: {{wallet.address}}<br>
+    <a (click)="setWallet(wallet)">これに決めた！</a>
+  </div>
 </div>

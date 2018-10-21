@@ -5,6 +5,9 @@ import { IdbModuleService } from '../idb-module.service';
 import { WalletStateService } from '../wallet-state.service';
 import { Wallet } from "../wallet";
 
+// プロトタイプ用
+import { CommunityService } from '../community.service';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -23,14 +26,23 @@ export class HomeComponent implements OnInit {
   wallets: Wallet[];
   subscription: Subscription;
 
+  // プロトタイプ用
+  walletList: Wallet[];
+
   constructor(
     private etherModuleService: EtherModuleService,
     private idbModuleService: IdbModuleService,
-    private walletStateService: WalletStateService
+    private walletStateService: WalletStateService,
+    // プロトタイプ用
+    private communityService: CommunityService
   ) {}
 
   ngOnInit(){ 
     this._checkWallet();
+
+    // for prototype
+    this.communityService.getWallets()
+      .subscribe(wallets => this.walletList = wallets);
   }
 
   createWallet(){
@@ -74,6 +86,16 @@ export class HomeComponent implements OnInit {
    * reflesh wallet state.
    */
   reflesh(){
+    this._checkWallet();
+  }
+
+  /**
+   * only prototype
+   * set wallet choosed
+   * @param wallet
+   */
+  setWallet(wallet: Wallet) {
+    this.walletStateService.setAccount(wallet.name, wallet.address);
     this._checkWallet();
   }
 

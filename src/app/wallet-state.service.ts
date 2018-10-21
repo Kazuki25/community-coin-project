@@ -89,6 +89,16 @@ export class WalletStateService {
   }
 
   /**
+   * set new account *this method is only called in prototype
+   * @param _name 
+   * @param _addr 
+   */
+  setAccount(_name: string, _addr: string) {
+    this.wallet.Accounts[_name] = _addr;
+    this.saveState();
+    console.log("[WalletStateService]:Set account you choosed!")
+  }
+  /**
    * remove a contract data from app storage.(Not blockchain!)
    * @param _name contract name
    */
