@@ -16,6 +16,7 @@ export class CommunitiesComponent implements OnInit {
   haveCoin: boolean;
   accounts: string[];
   coinbase: string;
+  currentWallet: string;
 
   // CommunityCoin登録用変数
   coinName: string;
@@ -32,7 +33,20 @@ export class CommunitiesComponent implements OnInit {
 
   ngOnInit() {
     // this.getCommunities();
-    this._checkCoin();
+    // this._checkCoin();
+    this.initWalletAddress();
+    this.coinName = "SimpleCommunityCoin";
+    this.coinAddress = "0xabc61b1859dd77c6c894e0549358370c79f242a1";
+    this.registerCoin();
+    this.etherModuleService.setCommunityCoin();
+  }
+
+  initWalletAddress(): void {
+    // Walletアドレスを取得する
+    let obj = this.walletStateService.getAccounts();
+    for (let key in obj) {
+      this.currentWallet = obj[key]
+    }
   }
 
   getCommunities(): void {
@@ -41,7 +55,8 @@ export class CommunitiesComponent implements OnInit {
     // 毎回初期化する.
     this.coins = [];
     for (let key in obj) {
-      this.coins.push(new Coin(key, obj[key]));
+      let value = this.etherModuleService.getTokenBalance(this.currentWallet);
+      this.coins.push(new Coin(key, obj[key], value));
     } 
   }
 
@@ -105,7 +120,15 @@ export class CommunitiesComponent implements OnInit {
     // 毎回初期化する.
     this.coins = [];
     for (let key in obj) {
-      this.coins.push(new Coin(key, obj[key]));
+      let value = this.getTokenBalance(this.currentWallet);
+      this.coins.push(new Coin(key, obj[key], value));
     }
+  }
+
+  /**
+   * get token balance
+   */
+  private getTokenBalance(address: string):number {
+    return this.etherModuleService.getTokenBalance(this.currentWallet);
   }
 }

@@ -17,6 +17,9 @@ export class HomeComponent implements OnInit {
   // Wallet作成用変数
   password: string;
   walletName: string;
+  // Wallet登録用変数
+  walletNameExist: string;
+  address: string;
 
   // CommunityCoin登録用変数
   coinName: string;
@@ -58,6 +61,12 @@ export class HomeComponent implements OnInit {
         }
       }
     )
+  }
+
+  registerWallet(){
+    console.log("[homeComponent]:register wallet.");
+    this.walletStateService.setAccount(this.walletName, this.address);
+    this._checkWallet();
   }
 
   /**
