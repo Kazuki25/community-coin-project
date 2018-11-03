@@ -116,6 +116,7 @@ export class WalletStateService {
    */
   setNewCoin(_name:string, _addr:string) {
     this.wallet.Contracts[_name] = _addr;
+    this.etherModuleService.setCommunityCoin(_addr);
     // TODO: add communication to block chain.
     // TODO close
     this.saveState();

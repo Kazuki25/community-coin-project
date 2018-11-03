@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import Web3 from 'web3';
-import { Tx } from 'ethereumjs-tx';
+import EthereumTx from 'ethereumjs-tx';
 import { ContractInfo } from "./contract/contract-abi";
 import { Buffer } from 'buffer';
 
@@ -14,8 +14,7 @@ export class EtherModuleService {
   private token: ContractInfo;
   private contractObj;
 
-  private privateKey;
-  private account;
+  private admin;
 
   constructor() {
     if (typeof window.web3 !== 'undefined') {
@@ -32,8 +31,11 @@ export class EtherModuleService {
     }
 
     window.web3 = new Web3(this.web3Provider);
-    this.token = new ContractInfo();
 
+    this.token = new ContractInfo();
+    this.admin = window.web3.eth.accounts.privateKeyToAccount(
+      '0x' + '080A535BADB103F734F0C1581E1A2EA954A918D089BD752690C2E02F47E27C01'
+    );
     // this.privateKey = "080A535BADB103F734F0C1581E1A2EA954A918D089BD752690C2E02F47E27C01";
     // this.account = window.web3.eth.accounts.privateKeyToAccount(this.privateKey);
   }
@@ -66,15 +68,61 @@ export class EtherModuleService {
    * @param addr address to recieve 1 lovelace.
    */
   get1lovelace(addr:string):Promise<object> {
-    // let transaction = {
-    //   from: "0xeceC49e7056ed6d3700FD49C3C436940459EF1df",
-    //   to: addr,
-    //   value: window.web3.utils.unitMap.lovelace
-    // }
-    // return window.web3.eth.sendTransaction(transaction);
+    console.dir(this.admin);
     const parameter = {
-      from: this.account.address,
-      to: addEventListener,
+      from: this.admin.address,
+      to: addr,
+      value: window.web3.utils.unitMap.lovelace,
+      gasLimit: undefined,
+      gasPrice: undefined,
+      nonce: undefined
+    };
+
+    return window.web3.eth.estimateGas(parameter)
+      .then((gasLimit) => {
+        // estimateGasを実行した瞬間とトランザクションを送信する瞬間で変化が
+        // 起きるため、余裕を持っておく。
+        parameter.gasLimit = window.web3.utils.toHex(gasLimit + 10000);
+        console.info("first step")
+        console.dir(parameter);
+        return window.web3.eth.getGasPrice();
+      })
+      .then((gasPrice) => {
+        parameter.gasPrice = window.web3.utils.toHex(gasPrice);
+        console.info("send step")
+        console.dir(parameter);
+        return window.web3.eth.getGasPrice();
+      })
+      .then((count)=> {
+        parameter.nonce = count;
+        console.info("third step")
+        console.dir(parameter);
+        const transaction = new EthereumTx(parameter);
+        // 管理者アカウントのプライベートキーで署名する: そのままだとエラーとなるので、'0x'を除く.
+        transaction.sign(Buffer.from(this.admin.privateKey.slice(2),'hex'));
+        window.web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'))
+          .once('transactionHash', (hash) => {
+            console.info('transactionHash', 'https://kovan.etherscan.io/tx/' + hash);
+          })
+          .once('receipt', (receipt) => {
+            console.info('receipt', receipt);
+          })
+          .on('confirmation', (confirmationNumber, receipt) => {
+            console.info('confirmation', confirmationNumber, receipt);
+          })
+          .on('error', console.error);
+      })
+      .catch(console.error);
+  }
+
+  /**
+   * send ether
+   * @param _to address to recieve ether
+   */
+  sendEther(_from: string, _to: string) {
+    const parameter = {
+      from: _from,
+      to: _to,
       value: window.web3.utils.unitMap.lovelace,
       gasLimit: undefined,
       gasPrice: undefined,
@@ -86,30 +134,38 @@ export class EtherModuleService {
         // estimateGasを実行した瞬間とトランザクションを送信する瞬間で変化が
         // 起きるため、余裕を持っておく。
         parameter.gasLimit = window.web3.utils.toHex(gasLimit + 10000);
+        console.info("first step")
+        console.dir(parameter);
         return window.web3.eth.getGasPrice();
       })
       .then((gasPrice) => {
         parameter.gasPrice = window.web3.utils.toHex(gasPrice);
+        console.info("second step")
+        console.dir(parameter);
         return window.web3.eth.getGasPrice();
       })
       .then((count)=> {
         parameter.nonce = count;
-        const transaction = new Tx(parameter);
-        transaction.sign(Buffer.from(this.account.privateKey, 'hex'));
-        return window.web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'))
+        console.info("third step")
+        console.dir(parameter);
+        const transaction = new EthereumTx(parameter);
+        // 管理者アカウントのプライベートキーで署名する: そのままだとエラーとなるので、'0x'を除く.
+        transaction.sign(Buffer.from(this.admin.privateKey.slice(2),'hex'));
+        window.web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'))
           .once('transactionHash', (hash) => {
-            console.info('transactionHash', 'https://etherscan.io/tx/' + hash);
+            console.info('transactionHash', 'https://kovan.etherscan.io/tx/' + hash);
           })
-          // .once('receipt', (receipt) => {
-          //   console.info('receipt', receipt);
-          // })
-          // .on('confirmation', (confirmationNumber, receipt) => {
-          //   console.info('confirmation', confirmationNumber, receipt);
-          // })
-          // .on('error', console.error);
+          .once('receipt', (receipt) => {
+            console.info('receipt', receipt);
+          })
+          .on('confirmation', (confirmationNumber, receipt) => {
+            console.info('confirmation', confirmationNumber, receipt);
+          })
+          .on('error', console.error);
       })
-      // .catch(console.error);
-  }
+      .catch(console.error);
+  }  
+
 
   /**
    * get account
@@ -119,10 +175,10 @@ export class EtherModuleService {
     return window.web3.eth.getAccounts();
   }; 
 
-  setCommunityCoin() {
-    console.log(this.token.simpleCommunityCoinInfo)
-    this.contractObj = new window.web3.eth.Contract(this.token.simpleCommunityCoinInfo.abi, "0xabc61b1859dd77c6c894e0549358370c79f242a1");
-    console.log(this.contractObj.options);
+  setCommunityCoin(_addr: string) {
+    // console.log(this.token.simpleCommunityCoinInfo)
+    this.contractObj = new window.web3.eth.Contract(this.token.simpleCommunityCoinInfo.abi, _addr);
+    // console.log(this.contractObj.options);
   }
 
   /**
@@ -137,14 +193,9 @@ export class EtherModuleService {
    * Get community coin balance.Not ether.
    * @param walletAddress 
    */
-  getTokenBalance(walletAddress:string): number{
-    let balance = 0;
-    // 引数にウォレットのアドレスを渡して、balanceOf 関数を呼ぶ
-    this.contractObj.balanceOf(walletAddress, (error, result) => {
-      balance = result;
-      // console.log(balance.toString());
-    });
-    return balance;
+  getTokenBalance(walletAddress:string): Promise<number>{
+    // コントラクトを実行し、トークン残高を取得する.
+    return this.contractObj.methods.balanceOf(walletAddress).call();
   }
 
   /**
@@ -154,8 +205,8 @@ export class EtherModuleService {
   setWalletFromPrivateKey(externalPrivateKey: string): string {
     // const key = Buffer.from(externalPrivateKey, 'hex');
     const key = '0x' + externalPrivateKey;
-    this.account = window.web3.eth.accounts.privateKeyToAccount(key);
-    console.dir(this.account);
-    return this.account.address;
+    let account = window.web3.eth.accounts.privateKeyToAccount(key);
+    // console.dir(account);
+    return account.address;
   }
 }

@@ -38,7 +38,7 @@ export class CommunitiesComponent implements OnInit {
     this.coinName = "SimpleCommunityCoin";
     this.coinAddress = "0xabc61b1859dd77c6c894e0549358370c79f242a1";
     this.registerCoin();
-    this.etherModuleService.setCommunityCoin();
+    this.etherModuleService.setCommunityCoin(this.coinAddress);
   }
 
   initWalletAddress(): void {
@@ -55,8 +55,13 @@ export class CommunitiesComponent implements OnInit {
     // 毎回初期化する.
     this.coins = [];
     for (let key in obj) {
-      let value = this.etherModuleService.getTokenBalance(this.currentWallet);
-      this.coins.push(new Coin(key, obj[key], value));
+      console.log(this.currentWallet + 'get balance of ' + obj[key]);
+      this.etherModuleService.getTokenBalance(this.currentWallet).then(
+        (value) => {
+          this.coins.push(new Coin(key, obj[key], value));
+          console.log('balanceOf: ' + value);
+        }
+      );
     } 
   }
 
@@ -120,15 +125,18 @@ export class CommunitiesComponent implements OnInit {
     // 毎回初期化する.
     this.coins = [];
     for (let key in obj) {
-      let value = this.getTokenBalance(this.currentWallet);
-      this.coins.push(new Coin(key, obj[key], value));
+      this.getTokenBalance(this.currentWallet).then(
+        (value) => {
+          this.coins.push(new Coin(key, obj[key], value));
+        }
+      );  
     }
   }
 
   /**
    * get token balance
    */
-  private getTokenBalance(address: string):number {
+  private getTokenBalance(address: string):Promise<number> {
     return this.etherModuleService.getTokenBalance(this.currentWallet);
   }
 }
