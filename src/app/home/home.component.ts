@@ -19,7 +19,7 @@ export class HomeComponent implements OnInit {
   walletName: string;
   // Wallet登録用変数
   walletNameExist: string;
-  address: string;
+  privateKey: string;
 
   // CommunityCoin登録用変数
   coinName: string;
@@ -63,9 +63,12 @@ export class HomeComponent implements OnInit {
     )
   }
 
-  registerWallet(){
+  registerWallet(privateKey: string){
     console.log("[homeComponent]:register wallet.");
-    this.walletStateService.setAccount(this.walletName, this.address);
+    let addr = this.etherModuleService.setWalletFromPrivateKey(privateKey);
+    this.walletStateService.setAccount(this.walletNameExist, addr);
+    this.walletNameExist = "";
+    this.privateKey = "";
     this._checkWallet();
   }
 
@@ -115,7 +118,7 @@ export class HomeComponent implements OnInit {
   private _checkWallet(){
     let obj = this.walletStateService.getAccounts();
     let num = Object.keys(obj).length;
-    // console.log("You have "+num+" wallets.");
+    console.log("You have "+num+" wallets.");
     if(num == 0) {
       this.haveWallet = false;
     } else {
