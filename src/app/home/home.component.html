@@ -19,9 +19,25 @@ CommunityCoinWalletへようこそ！
 <div *ngIf="!haveWallet">
   <p>まだWalletがありません</p>
   <br>
-
+  新しいアドレス取得する
+  <br>
   <input [(ngModel)]="walletName" placeholder="Wallet name"/><br>
   <input [(ngModel)]="password" placeholder="New password"/><br>
   <!-- <a>タグのスタイリッシュなボタンに後で変えたい -->
   <button (click)="createWallet()">新しいWalletを作る</button>
+
+  <br>Or<br>
+  既存のアドレスを登録する(プライベートキーから作成)
+  <br>
+  <input [(ngModel)]="walletNameExist" placeholder="Wallet name"/><br>
+  <input [(ngModel)]="privateKey" placeholder="privateKey"/><br>
+  <!-- <a>タグのスタイリッシュなボタンに後で変えたい -->
+  <button (click)="registerWallet(privateKey)">新しいWalletを作る</button>
+
+  <!-- <br>Or<br>
+  walletを選んでね
+  <div *ngFor="let wallet of walletList">
+    {{wallet.name}}: {{wallet.address}}<br>
+    <a (click)="setWallet(wallet)">これに決めた！</a>
+  </div> -->
 </div>

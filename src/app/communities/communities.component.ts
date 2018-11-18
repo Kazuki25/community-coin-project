@@ -1,8 +1,6 @@
 import { Component, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CommunityService } from '../community.service';
 import { EtherModuleService } from '../ether-module.service';
-import { IdbModuleService } from '../idb-module.service';
 import { WalletStateService } from '../wallet-state.service';
 import { Coin } from '../coin';
 
@@ -16,6 +14,7 @@ export class CommunitiesComponent implements OnInit {
   haveCoin: boolean;
   accounts: string[];
   coinbase: string;
+  currentWallet: string;
 
   // CommunityCoin登録用変数
   coinName: string;
@@ -24,15 +23,26 @@ export class CommunitiesComponent implements OnInit {
   subscription: Subscription;
 
   constructor(
-    private communityService: CommunityService,
     private etherModuleService: EtherModuleService,
-    private idbModuleService: IdbModuleService,
     private walletStateService: WalletStateService
   ) { }
 
   ngOnInit() {
     // this.getCommunities();
-    this._checkCoin();
+    // this._checkCoin();
+    this.initWalletAddress();
+    this.coinName = "SimpleCommunityCoin";
+    this.coinAddress = "0xabc61b1859dd77c6c894e0549358370c79f242a1";
+    this.registerCoin();
+    this.etherModuleService.setCommunityCoin(this.coinAddress);
+  }
+
+  initWalletAddress(): void {
+    // Walletアドレスを取得する
+    let obj = this.walletStateService.getAccounts();
+    for (let key in obj) {
+      this.currentWallet = obj[key]
+    }
   }
 
   getCommunities(): void {
@@ -41,7 +51,13 @@ export class CommunitiesComponent implements OnInit {
     // 毎回初期化する.
     this.coins = [];
     for (let key in obj) {
-      this.coins.push(new Coin(key, obj[key]));
+      console.log(this.currentWallet + 'get balance of ' + obj[key]);
+      this.etherModuleService.getTokenBalance(this.currentWallet).then(
+        (value) => {
+          this.coins.push(new Coin(key, obj[key], value));
+          console.log('balanceOf: ' + value);
+        }
+      );
     } 
   }
 
@@ -54,13 +70,7 @@ export class CommunitiesComponent implements OnInit {
     // form initialize
     this.coinName = "";
     this.coinAddress = "";
-    // this.subscription = this.walletStateService.coinRegistered$.subscribe(
-    //   (result) => {
-    //     if(result === true){
-    //       // this._checkCoin();
-    //     }
-    //   }
-    // )
+
     this._checkCoin();
   }
 
@@ -68,6 +78,15 @@ export class CommunitiesComponent implements OnInit {
    * reflesh coin list
    */
   refleshList() {
+    console.log("coins");
+    console.dir(this.coins);
+
+    for (let item in this.coins) {
+      // console.log('in the loop!');
+      // console.dir(this.coins[item].address);
+      this.etherModuleService.setCommunityCoin(this.coins[item].address);
+    }
+    
     this._checkCoin();
   }
 
@@ -105,7 +124,18 @@ export class CommunitiesComponent implements OnInit {
     // 毎回初期化する.
     this.coins = [];
     for (let key in obj) {
-      this.coins.push(new Coin(key, obj[key]));
+      this.getTokenBalance(this.currentWallet).then(
+        (value) => {
+          this.coins.push(new Coin(key, obj[key], value));
+        }
+      );  
     }
+  }
+
+  /**
+   * get token balance
+   */
+  private getTokenBalance(address: string):Promise<number> {
+    return this.etherModuleService.getTokenBalance(address);
   }
 }

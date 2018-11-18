@@ -5,6 +5,9 @@ import { IdbModuleService } from '../idb-module.service';
 import { WalletStateService } from '../wallet-state.service';
 import { Wallet } from "../wallet";
 
+// プロトタイプ用
+import { CommunityService } from '../community.service';
+
 @Component({
   selector: 'app-home',
   templateUrl: './home.component.html',
@@ -14,6 +17,9 @@ export class HomeComponent implements OnInit {
   // Wallet作成用変数
   password: string;
   walletName: string;
+  // Wallet登録用変数
+  walletNameExist: string;
+  privateKey: string;
 
   // CommunityCoin登録用変数
   coinName: string;
@@ -23,14 +29,23 @@ export class HomeComponent implements OnInit {
   wallets: Wallet[];
   subscription: Subscription;
 
+  // プロトタイプ用
+  walletList: Wallet[];
+
   constructor(
     private etherModuleService: EtherModuleService,
     private idbModuleService: IdbModuleService,
-    private walletStateService: WalletStateService
+    private walletStateService: WalletStateService,
+    // プロトタイプ用
+    private communityService: CommunityService
   ) {}
 
   ngOnInit(){ 
     this._checkWallet();
+
+    // for prototype
+    this.communityService.getWallets()
+      .subscribe(wallets => this.walletList = wallets);
   }
 
   createWallet(){
@@ -46,6 +61,16 @@ export class HomeComponent implements OnInit {
         }
       }
     )
+  }
+
+  registerWallet(privateKey: string){
+    console.log("[homeComponent]:register wallet.");
+    let addr = this.etherModuleService.setWalletFromPrivateKey(privateKey);
+    this.walletStateService.setAccount(this.walletNameExist, addr);
+    this.walletStateService.savePrivateKey(privateKey);
+    this.walletNameExist = "";
+    // this.privateKey = "";
+    this._checkWallet();
   }
 
   /**
@@ -78,13 +103,25 @@ export class HomeComponent implements OnInit {
   }
 
   /**
+   * only prototype
+   * set wallet choosed
+   * @param wallet
+   */
+  setWallet(wallet: Wallet) {
+    this.walletStateService.setAccount(wallet.name, wallet.address);
+    this._checkWallet();
+  }
+
+  /**
    * check if you have your wallet address
    * no params
    */
   private _checkWallet(){
     let obj = this.walletStateService.getAccounts();
     let num = Object.keys(obj).length;
-    // console.log("You have "+num+" wallets.");
+    console.log('recieve obj from walletStateServie');
+    console.dir(obj);
+    console.log("You have "+num+" wallets.");
     if(num == 0) {
       this.haveWallet = false;
     } else {

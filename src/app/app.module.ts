@@ -18,13 +18,15 @@ import { IdbModuleService } from './idb-module.service';
 import { EtherModuleService } from './ether-module.service';
 import { WalletStateService } from './wallet-state.service';
 import { CommunityService } from './community.service';
+import { SendComponent } from './send/send.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     CommunitiesComponent,
     MessagesComponent,
-    HomeComponent
+    HomeComponent,
+    SendComponent
   ],
   imports: [
     BrowserModule,

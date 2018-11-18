@@ -25,7 +25,7 @@ export class WalletStateService {
     let localWallet = this.idbModuleService.get(this.registerkey);
     if(localWallet===null) {
       // create new wallet data.
-      this.wallet = { "Accounts":{},"Contracts":{}};
+      this.wallet = { "Accounts":{},"Contracts":{}, "SendTo": {}, "PrivateKey": {}};
       this.idbModuleService.set(this.registerkey, this.wallet);
       console.log("[walletStateService]:You didn't have wallet. I created your wallet.")
     } else {
@@ -89,6 +89,16 @@ export class WalletStateService {
   }
 
   /**
+   * set new account *this method is only called in prototype
+   * @param _name 
+   * @param _addr 
+   */
+  setAccount(_name: string, _addr: string) {
+    this.wallet.Accounts[_name] = _addr;
+    this.saveState();
+    console.log("[WalletStateService]:Set account you choosed!")
+  }
+  /**
    * remove a contract data from app storage.(Not blockchain!)
    * @param _name contract name
    */
@@ -106,10 +116,26 @@ export class WalletStateService {
    */
   setNewCoin(_name:string, _addr:string) {
     this.wallet.Contracts[_name] = _addr;
+    this.etherModuleService.setCommunityCoin(_addr);
     // TODO: add communication to block chain.
     // TODO close
     this.saveState();
     this.coinRegisteredSource.next(true);
     console.log("[WalletStateService]:Complete to register new coin!");
+  }
+
+  /**
+   * save privateKey
+   */
+  savePrivateKey(_key: string) {
+    this.wallet.PrivateKey["key"] = _key;
+    this.saveState();
+  }
+
+  /**
+   * get privateKey
+   */
+  getPrivateKey(): string {
+    return this.wallet.PrivateKey["key"];
   }
 }
