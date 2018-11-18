@@ -1,8 +1,6 @@
 import { Component, OnInit} from '@angular/core';
 import { Subscription } from 'rxjs';
-import { CommunityService } from '../community.service';
 import { EtherModuleService } from '../ether-module.service';
-import { IdbModuleService } from '../idb-module.service';
 import { WalletStateService } from '../wallet-state.service';
 import { Coin } from '../coin';
 
@@ -25,9 +23,7 @@ export class CommunitiesComponent implements OnInit {
   subscription: Subscription;
 
   constructor(
-    private communityService: CommunityService,
     private etherModuleService: EtherModuleService,
-    private idbModuleService: IdbModuleService,
     private walletStateService: WalletStateService
   ) { }
 
@@ -74,13 +70,7 @@ export class CommunitiesComponent implements OnInit {
     // form initialize
     this.coinName = "";
     this.coinAddress = "";
-    // this.subscription = this.walletStateService.coinRegistered$.subscribe(
-    //   (result) => {
-    //     if(result === true){
-    //       // this._checkCoin();
-    //     }
-    //   }
-    // )
+
     this._checkCoin();
   }
 
@@ -88,6 +78,15 @@ export class CommunitiesComponent implements OnInit {
    * reflesh coin list
    */
   refleshList() {
+    console.log("coins");
+    console.dir(this.coins);
+
+    for (let item in this.coins) {
+      // console.log('in the loop!');
+      // console.dir(this.coins[item].address);
+      this.etherModuleService.setCommunityCoin(this.coins[item].address);
+    }
+    
     this._checkCoin();
   }
 
@@ -137,6 +136,6 @@ export class CommunitiesComponent implements OnInit {
    * get token balance
    */
   private getTokenBalance(address: string):Promise<number> {
-    return this.etherModuleService.getTokenBalance(this.currentWallet);
+    return this.etherModuleService.getTokenBalance(address);
   }
 }

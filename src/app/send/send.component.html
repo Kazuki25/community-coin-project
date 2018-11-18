@@ -1,3 +1,10 @@
-<p>
-  send works!
-</p>
+
+
+<input type="text" placeholder="Send to..." [(ngModel)]="sendto">に<br>
+<input type="number" placeholder="Amount of Coin..." [(ngModel)]="amount">のコインを送る
+
+<br>
+<button (click)="exec()">送金</button>
+
+<br>
+※送金ボタンを押す前にBALANCEタブのコインリストの最新化ボタンを押してください。

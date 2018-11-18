@@ -67,8 +67,9 @@ export class HomeComponent implements OnInit {
     console.log("[homeComponent]:register wallet.");
     let addr = this.etherModuleService.setWalletFromPrivateKey(privateKey);
     this.walletStateService.setAccount(this.walletNameExist, addr);
+    this.walletStateService.savePrivateKey(privateKey);
     this.walletNameExist = "";
-    this.privateKey = "";
+    // this.privateKey = "";
     this._checkWallet();
   }
 
@@ -118,6 +119,8 @@ export class HomeComponent implements OnInit {
   private _checkWallet(){
     let obj = this.walletStateService.getAccounts();
     let num = Object.keys(obj).length;
+    console.log('recieve obj from walletStateServie');
+    console.dir(obj);
     console.log("You have "+num+" wallets.");
     if(num == 0) {
       this.haveWallet = false;

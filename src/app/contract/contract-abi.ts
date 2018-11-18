@@ -10111,7 +10111,15 @@ export class ContractInfo {
         "name": "solc",
         "version": "0.4.24+commit.e67f0147.Emscripten.clang"
       },
-      "networks": {},
+      "networks": {
+        "testnet": {
+          "events": {},
+          "links": {},
+          "address": "",
+          "transactionHash": "0x48fcd4ef4b6e32a17e2d3d463fc8950ec419b9a7fac46b5a9cb5a7817d2a1515"
+        }
+
+      },
       "schemaVersion": "2.0.1",
       "updatedAt": "2018-10-28T22:33:24.590Z"
     }

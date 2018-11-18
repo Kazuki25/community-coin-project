@@ -15,8 +15,9 @@ export class EtherModuleService {
   private contractObj;
 
   private admin;
+  private owner;
 
-  constructor() {
+  constructor(  ) {
     if (typeof window.web3 !== 'undefined') {
       this.web3Provider = window.web3.currentProvider;
     } else {
@@ -36,6 +37,7 @@ export class EtherModuleService {
     this.admin = window.web3.eth.accounts.privateKeyToAccount(
       '0x' + '080A535BADB103F734F0C1581E1A2EA954A918D089BD752690C2E02F47E27C01'
     );
+    this.owner = undefined;
     // this.privateKey = "080A535BADB103F734F0C1581E1A2EA954A918D089BD752690C2E02F47E27C01";
     // this.account = window.web3.eth.accounts.privateKeyToAccount(this.privateKey);
   }
@@ -142,7 +144,7 @@ export class EtherModuleService {
         parameter.gasPrice = window.web3.utils.toHex(gasPrice);
         console.info("second step")
         console.dir(parameter);
-        return window.web3.eth.getGasPrice();
+        return window.web3.eth.getTransactionCount();
       })
       .then((count)=> {
         parameter.nonce = count;
@@ -166,6 +168,80 @@ export class EtherModuleService {
       .catch(console.error);
   }  
 
+    /**
+   * send coin
+   * @param _privateKey sender's privatekey
+   * @param _to address to recieve coin
+   * @param _value amount coin to send
+   */
+  sendCoin(_privateKey: string, _to: string, _value: number) {
+    this.setWalletFromPrivateKey(_privateKey);
+    console.info('set private key. ready to send coin.');
+    console.info('contract address: ' + this.token.simpleCommunityCoinInfo.networks.testnet.address);
+    const parameter = {
+      from: this.owner.address,
+      to: this.token.simpleCommunityCoinInfo.networks.testnet.address,
+      data: undefined,
+      gasLimit: undefined,
+      gasPrice: undefined,
+      nonce: undefined
+    };
+    console.info('parameter init.');
+
+    this.setContractObj();
+    console.info('contract object setted.');
+    console.debug(this.owner.address);
+    parameter.data = this.contractObj.methods.transferFrom(
+      this.owner.address,
+      _to,
+      _value
+    ).encodeABI();
+
+    console.log('parameter date is setted: ' + parameter.data);
+    console.log('from: ' + parameter.from);
+    console.log('to: ' + parameter.to);
+    // window.web3.eth.estimateGas({
+    //   from: parameter.from,
+    //   to: parameter.to,
+    //   data: parameter.data
+    // }).then(console.log);
+    window.web3.eth.estimateGas(parameter)
+      .then((gasLimit) => {
+        // estimateGasを実行した瞬間とトランザクションを送信する瞬間で変化が
+        // 起きるため、余裕を持っておく。
+        console.info('estimate gas.');
+        parameter.gasLimit = window.web3.utils.toHex(gasLimit + 10000);
+        console.info("first step")
+        console.dir(parameter);
+        return window.web3.eth.getGasPrice();
+      })
+      .then((gasPrice) => {
+        parameter.gasPrice = window.web3.utils.toHex(gasPrice);
+        console.info("second step")
+        console.dir(parameter);
+        return window.web3.eth.getTransactionCount(this.owner.address);
+      })
+      .then((count)=> {
+        parameter.nonce = count;
+        console.info("third step")
+        console.dir(parameter);
+        const transaction = new EthereumTx(parameter);
+        // 管理者アカウントのプライベートキーで署名する: そのままだとエラーとなるので、'0x'を除く.
+        transaction.sign(Buffer.from(this.owner.privateKey.slice(2),'hex'));
+        window.web3.eth.sendSignedTransaction('0x' + transaction.serialize().toString('hex'))
+          .once('transactionHash', (hash) => {
+            console.info('transactionHash', 'https://kovan.etherscan.io/tx/' + hash);
+          })
+          .once('receipt', (receipt) => {
+            console.info('receipt', receipt);
+          })
+          .on('confirmation', (confirmationNumber, receipt) => {
+            console.info('confirmation', confirmationNumber, receipt);
+          })
+          .on('error', console.error);
+      })
+      .catch(console.error);
+  }  
 
   /**
    * get account
@@ -177,6 +253,7 @@ export class EtherModuleService {
 
   setCommunityCoin(_addr: string) {
     // console.log(this.token.simpleCommunityCoinInfo)
+    this.token.simpleCommunityCoinInfo.networks.testnet.address = _addr;
     this.contractObj = new window.web3.eth.Contract(this.token.simpleCommunityCoinInfo.abi, _addr);
     // console.log(this.contractObj.options);
   }
@@ -186,7 +263,7 @@ export class EtherModuleService {
    * @param _addr
    */
   switchCoin(_addr:string):void {
-    this.contractObj = new window.web3.eth.Contract(this.token.simpleCommunityCoinInfo, _addr);
+    this.contractObj = new window.web3.eth.Contract(this.token.simpleCommunityCoinInfo.abi, _addr);
   }
   
   /**
@@ -194,8 +271,16 @@ export class EtherModuleService {
    * @param walletAddress 
    */
   getTokenBalance(walletAddress:string): Promise<number>{
-    // コントラクトを実行し、トークン残高を取得する.
-    return this.contractObj.methods.balanceOf(walletAddress).call();
+    // コントラクトを実行し、トークン残高を取得する
+    console.info('[etherModuleService]: Wallet address is ' + walletAddress);
+    console.info('[etherModuleService]: Get contract object.')
+    console.dir(this.contractObj);
+    if(walletAddress === undefined) {
+      return new Promise(function(){return 0});
+    } else {
+      const contractToCall = this.contractObj.methods.balanceOf(walletAddress)
+      return contractToCall.call();  
+    }
   }
 
   /**
@@ -205,8 +290,25 @@ export class EtherModuleService {
   setWalletFromPrivateKey(externalPrivateKey: string): string {
     // const key = Buffer.from(externalPrivateKey, 'hex');
     const key = '0x' + externalPrivateKey;
-    let account = window.web3.eth.accounts.privateKeyToAccount(key);
+    // const key = externalPrivateKey;
+    this.owner = window.web3.eth.accounts.privateKeyToAccount(key);
     // console.dir(account);
-    return account.address;
+    return this.owner.address;
+  }
+
+  // setOwnerFromWallet() {
+  //   let externalPrivateKey = this.walletStateService.getPrivateKey();
+  //   // const key = Buffer.from(externalPrivateKey, 'hex');
+  //   const key = '0x' + externalPrivateKey;
+  //   this.owner = window.web3.eth.accounts.privateKeyToAccount(key);
+  //   // console.dir(account);
+  //   return this.owner.address;
+  // }
+
+  private setContractObj() {
+    this.contractObj = new window.web3.eth.Contract(
+      this.token.simpleCommunityCoinInfo.abi,
+      this.token.simpleCommunityCoinInfo.networks.testnet.address
+      );
   }
 }

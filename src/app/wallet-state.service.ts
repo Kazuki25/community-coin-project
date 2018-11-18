@@ -25,7 +25,7 @@ export class WalletStateService {
     let localWallet = this.idbModuleService.get(this.registerkey);
     if(localWallet===null) {
       // create new wallet data.
-      this.wallet = { "Accounts":{},"Contracts":{}};
+      this.wallet = { "Accounts":{},"Contracts":{}, "SendTo": {}, "PrivateKey": {}};
       this.idbModuleService.set(this.registerkey, this.wallet);
       console.log("[walletStateService]:You didn't have wallet. I created your wallet.")
     } else {
@@ -122,5 +122,20 @@ export class WalletStateService {
     this.saveState();
     this.coinRegisteredSource.next(true);
     console.log("[WalletStateService]:Complete to register new coin!");
+  }
+
+  /**
+   * save privateKey
+   */
+  savePrivateKey(_key: string) {
+    this.wallet.PrivateKey["key"] = _key;
+    this.saveState();
+  }
+
+  /**
+   * get privateKey
+   */
+  getPrivateKey(): string {
+    return this.wallet.PrivateKey["key"];
   }
 }
